@@ -1,0 +1,172 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  beforeImg: ImageMetadata;
+  afterImg: ImageMetadata;
+  beforeAlt: string;
+  afterAlt: string;
+  eager?: boolean;
+  sizes?: string;
+  /** CSS aspect-ratio for the frame, e.g. "1 / 1" or "4 / 3". */
+  aspect?: string;
+}
+
+const {
+  beforeImg,
+  afterImg,
+  beforeAlt,
+  afterAlt,
+  eager = false,
+  sizes = '(min-width: 900px) 48vw, 100vw',
+  aspect = '1 / 1',
+} = Astro.props;
+
+const widths = [480, 720, 1080];
+---
+
+<div class="ba" data-ba style={`--pos:55%;--ba-aspect:${aspect}`}>
+  <!-- After is the base layer (fills the frame); Before is clipped on top from
+       the left edge to the divider, so left = before, right = after. -->
+  <Image class="ba-img ba-after" src={afterImg} alt={afterAlt} widths={widths} sizes={sizes} loading={eager ? 'eager' : 'lazy'} />
+  <Image class="ba-img ba-before" src={beforeImg} alt={beforeAlt} widths={widths} sizes={sizes} loading={eager ? 'eager' : 'lazy'} />
+
+  <span class="ba-tag ba-tag-before" aria-hidden="true">Before</span>
+  <span class="ba-tag ba-tag-after" aria-hidden="true">After</span>
+
+  <div class="ba-divider" aria-hidden="true">
+    <span class="ba-grip"><span>‹</span><span>›</span></span>
+  </div>
+
+  <input
+    class="ba-range"
+    type="range"
+    min="0"
+    max="100"
+    value="55"
+    step="0.1"
+    aria-label="Drag to compare the before and after photos"
+  />
+</div>
+
+<script>
+  // Initialize every before/after comparator on the page.
+  document.querySelectorAll<HTMLElement>('[data-ba]').forEach((ba) => {
+    const range = ba.querySelector<HTMLInputElement>('.ba-range');
+    if (!range) return;
+    const set = (v: number | string) => ba.style.setProperty('--pos', `${v}%`);
+    range.addEventListener('input', () => set(range.value));
+  });
+</script>
+
+<style>
+  .ba {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--ba-aspect, 1 / 1);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--color-cloud-2);
+    box-shadow: 0 22px 50px rgba(12, 44, 74, 0.22);
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .ba-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Clip the before image to the left portion [0 .. --pos]. */
+  .ba-before {
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+
+  .ba-tag {
+    position: absolute;
+    top: 0.85rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(12, 44, 74, 0.72);
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    backdrop-filter: blur(3px);
+    pointer-events: none;
+  }
+  .ba-tag-before { left: 0.85rem; }
+  .ba-tag-after { right: 0.85rem; background: rgba(14, 95, 168, 0.85); }
+
+  /* Vertical divider + circular grip, positioned at the wipe line. */
+  .ba-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 3px;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 1px rgba(12, 44, 74, 0.25);
+    pointer-events: none;
+  }
+  .ba-grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--color-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 4px 14px rgba(12, 44, 74, 0.35);
+  }
+
+  /* The range input is the actual control — full-cover, invisible, accessible.
+     Click or drag anywhere, or focus and use arrow keys. */
+  .ba-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+  .ba-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 44px;
+    height: 100%;
+  }
+  .ba-range::-moz-range-thumb {
+    width: 44px;
+    height: 100%;
+    border: 0;
+    background: transparent;
+  }
+  /* Visible focus ring on the comparator when the control is keyboard-focused. */
+  .ba-range:focus-visible {
+    outline: none;
+  }
+  .ba:has(.ba-range:focus-visible) {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+</style>

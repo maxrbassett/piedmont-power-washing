@@ -1,0 +1,26 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Nav from '@components/Nav.astro';
+import Hero from '@components/Hero.astro';
+import Services from '@components/Services.astro';
+import Gallery from '@components/Gallery.astro';
+import ServiceArea from '@components/ServiceArea.astro';
+import Trust from '@components/Trust.astro';
+import Contact from '@components/Contact.astro';
+import SiteFooter from '@components/SiteFooter.astro';
+import MobileCallBar from '@components/MobileCallBar.astro';
+---
+
+<Layout>
+  <Nav />
+  <main id="main">
+    <Hero />
+    <Services />
+    <Gallery />
+    <ServiceArea />
+    <Trust />
+    <Contact />
+  </main>
+  <SiteFooter />
+  <MobileCallBar />
+</Layout>

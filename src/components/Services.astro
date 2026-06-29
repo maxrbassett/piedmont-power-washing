@@ -1,0 +1,120 @@
+---
+import * as site from '@data/site';
+
+// Inline icon paths keyed to Service.icon — simple, crisp line marks.
+const icons: Record<string, string> = {
+  house: 'M3 11.5 12 4l9 7.5M5 10v9h14v-9M9.5 19v-5h5v5',
+  surface: 'M3 17h18M3 17l3-9h12l3 9M8 8l-1 9M16 8l1 9M11 8v9',
+  deck: 'M4 9h16M4 9l1-4h14l1 4M6 9v11M18 9v11M4 20h16M10 9v11M14 9v11',
+  fence: 'M5 21V8l2-3 2 3v13M15 21V8l2-3 2 3v13M3 12h18M3 16h18',
+  restore: 'M12 3v4M12 7c-3 0-5 2-5 5v7h10v-7c0-3-2-5-5-5ZM9 19v-5M15 19v-5M12 19v-5',
+};
+---
+
+<section id="services" class="services" aria-labelledby="services-title">
+  <div class="wrap">
+    <p class="eyebrow">What we do</p>
+    <h2 id="services-title" class="section-title">Power washing services</h2>
+    <p class="section-intro">{site.servicesIntro}</p>
+
+    <ul class="svc-grid">
+      {site.services.map((s) => (
+        <li class="svc-card">
+          <span class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d={icons[s.icon]} />
+            </svg>
+          </span>
+          <h3 class="svc-title">{s.title}</h3>
+          <p class="svc-benefit">{s.benefit}</p>
+          <p class="svc-detail">{s.detail}</p>
+          <span class="svc-scope">{s.scope}</span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="svc-cta">
+      Not sure what your property needs? <a href="#contact">Ask for a free estimate</a> or call
+      <a href={`tel:${site.phoneTel}`}>{site.phone}</a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .services { background: var(--color-white); }
+
+  .svc-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) { .svc-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 960px) { .svc-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .svc-card {
+    background: var(--color-cloud);
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    padding: 1.6rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .svc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(12, 44, 74, 0.1);
+    border-color: var(--color-sky);
+  }
+  .svc-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--color-sky-tint);
+    color: var(--color-blue);
+    margin-bottom: 1rem;
+  }
+  .svc-title {
+    font-size: 1.2rem;
+    color: var(--color-navy);
+    margin-bottom: 0.4rem;
+  }
+  .svc-benefit {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-blue);
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  .svc-detail {
+    color: var(--color-slate);
+    font-size: 0.96rem;
+    flex-grow: 1;
+  }
+  .svc-scope {
+    align-self: flex-start;
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-slate);
+    background: var(--color-cloud-2);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .svc-cta {
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--color-slate);
+    font-size: 1.02rem;
+  }
+</style>

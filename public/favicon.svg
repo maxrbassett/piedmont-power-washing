@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Piedmont Power Washing water-drop mark">
+  <rect width="64" height="64" rx="13" fill="#0E5FA8"/>
+  <!-- water droplet -->
+  <path d="M32 12 C32 12 47 30 47 41 a15 15 0 0 1 -30 0 C17 30 32 12 32 12 Z" fill="#ffffff"/>
+  <!-- highlight / clean shine -->
+  <path d="M27 33 C24 37 24 42 27 46" fill="none" stroke="#84B4D8" stroke-width="3" stroke-linecap="round"/>
+</svg>

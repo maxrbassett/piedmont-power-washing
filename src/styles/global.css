@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Piedmont Power Washing — theme tokens
+   "Satisfying clean": a light, crisp water/blue palette drawn from the logo
+   (a Carolinas state silhouette in sky blue with charcoal type). Strong action
+   blue for CTAs, sky-blue accent, deep navy headings, slate body text on white.
+   Light theme. Tuned for AA contrast (navy/slate on white, white on blue).
+--------------------------------------------------------------------------- */
+@theme {
+  /* Action blues (clean water blue — brand primary) */
+  --color-blue: #0e5fa8;          /* primary action / links */
+  --color-blue-bright: #1577cc;   /* hover */
+  --color-blue-deep: #0a4778;     /* pressed / strong accents */
+
+  /* Sky / aqua accent (from the logo's state fill) */
+  --color-sky: #84b4d8;
+  --color-sky-mid: #5e9bc7;
+  --color-sky-tint: #dcebf6;      /* light wash for badges / panels */
+
+  /* Navy & ink (headings / text) */
+  --color-navy: #0c2c4a;          /* deepest — footer / headings on light */
+  --color-ink: #1f2a33;           /* body text */
+  --color-slate: #4f5e6a;         /* muted text */
+  --color-slate-soft: #768492;    /* faint text / captions */
+
+  /* Surfaces */
+  --color-white: #ffffff;
+  --color-cloud: #f3f8fc;         /* very light blue-gray section bg */
+  --color-cloud-2: #e7f0f8;       /* slightly deeper panel */
+  --color-line: #d9e4ee;          /* hairline borders */
+
+  /* Fonts */
+  --font-display: "Montserrat", "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ----------------------------- Base layer ------------------------------- */
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background-color: var(--color-white);
+    color: var(--color-ink);
+    line-height: 1.6;
+    font-size: 1.02rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-navy);
+    margin: 0;
+  }
+
+  p { margin: 0; }
+  img, svg { max-width: 100%; display: block; }
+  a { color: var(--color-blue); }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* --------------------------- Utilities ---------------------------------- */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 200;
+    background: var(--color-blue);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.65rem 1rem;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+}
+
+/* --------------------- Shared component primitives ---------------------- */
+.wrap {
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-blue);
+  margin: 0 0 0.6rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  letter-spacing: -0.02em;
+  color: var(--color-navy);
+  margin: 0 0 0.6rem;
+}
+
+.section-intro {
+  max-width: 64ch;
+  color: var(--color-slate);
+  font-size: 1.08rem;
+  margin: 0 0 2rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  padding: 0.85rem 1.6rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-size: 1rem;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: var(--color-blue);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(14, 95, 168, 0.28);
+}
+.btn-primary:hover { background: var(--color-blue-bright); }
+
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.65);
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.15); border-color: #fff; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-blue);
+  border-color: var(--color-blue);
+}
+.btn-outline:hover { background: var(--color-blue); color: #fff; }
+
+section { padding-block: clamp(3rem, 7vw, 5.5rem); }
+
+/* A subtle "clean line" divider — a thin water-blue rule with a soft sheen. */
+.wave-divider {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(to right, var(--color-sky) 0%, var(--color-blue) 50%, var(--color-sky) 100%);
+  opacity: 0.55;
+}

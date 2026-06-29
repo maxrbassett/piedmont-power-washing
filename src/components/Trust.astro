@@ -1,0 +1,123 @@
+---
+import * as site from '@data/site';
+import { Image } from 'astro:assets';
+import angi from '@assets/angies-list-badge.png';
+---
+
+<section id="trust" class="trust" aria-labelledby="trust-title">
+  <div class="wrap">
+    <p class="eyebrow">Why Piedmont</p>
+    <h2 id="trust-title" class="section-title">Trusted, careful, eco-friendly</h2>
+    <p class="section-intro">
+      We take great pride in our experience, expertise, quality, and customer service — on every job, large or small.
+    </p>
+
+    <ul class="trust-grid">
+      {site.trustPoints.map((t) => (
+        <li class="trust-card">
+          <span class="trust-stat">{t.stat}</span>
+          <span class="trust-label">{t.label}</span>
+          <span class="trust-note">{t.note}</span>
+        </li>
+      ))}
+    </ul>
+
+    <figure class="mission">
+      <blockquote>{site.mission}</blockquote>
+    </figure>
+
+    <div class="trust-links">
+      <p class="trust-links-lead">
+        We’re listed on Angi and post our latest work on Facebook — take a look:
+      </p>
+      <div class="trust-actions">
+        <a class="badge-link" href={site.links.angi} target="_blank" rel="noopener" aria-label="See us on Angi">
+          <Image src={angi} alt="Angie's List / Angi" widths={[120, 200]} sizes="160px" loading="lazy" />
+        </a>
+        <a class="btn btn-outline" href={site.links.facebook} target="_blank" rel="noopener">
+          <span aria-hidden="true">👍</span> Visit our Facebook
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .trust {
+    background: linear-gradient(180deg, var(--color-navy) 0%, var(--color-blue-deep) 100%);
+    color: #fff;
+  }
+  .trust :global(.eyebrow) { color: var(--color-sky); }
+  .trust :global(.section-title) { color: #fff; }
+  .trust :global(.section-intro) { color: #cfe2f1; }
+
+  .trust-grid {
+    list-style: none;
+    margin: 0 0 2.5rem;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 880px) { .trust-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .trust-card {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    padding: 1.4rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .trust-stat {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+    color: var(--color-sky);
+    line-height: 1;
+  }
+  .trust-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: #fff;
+  }
+  .trust-note { color: #cfe2f1; font-size: 0.9rem; }
+
+  .mission {
+    margin: 0 0 2.5rem;
+    max-width: 70ch;
+  }
+  .mission blockquote {
+    margin: 0;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    line-height: 1.6;
+    color: #eaf3fb;
+    font-style: italic;
+    border-left: 4px solid var(--color-sky);
+    padding-left: 1.2rem;
+  }
+
+  .trust-links-lead { color: #cfe2f1; margin-bottom: 1rem; }
+  .trust-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .badge-link {
+    display: inline-flex;
+    background: #fff;
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    line-height: 0;
+  }
+  .badge-link :global(img) { height: 48px; width: auto; }
+  .trust-actions .btn-outline {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  .trust-actions .btn-outline:hover { background: #fff; color: var(--color-blue-deep); border-color: #fff; }
+</style>

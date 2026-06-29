@@ -1,0 +1,96 @@
+---
+import * as site from '@data/site';
+import { Image } from 'astro:assets';
+import logo from '@assets/logo.png';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <Image src={logo} alt={`${site.longName} logo`} widths={[180, 260]} sizes="200px" loading="lazy" />
+      <p class="footer-tag">{site.tagline}</p>
+      <p class="footer-loc">Serving Charlotte, NC &amp; the surrounding NC/SC area</p>
+    </div>
+
+    <nav class="footer-nav" aria-label="Footer">
+      {site.nav.map((n) => <a href={n.href}>{n.label}</a>)}
+      <a href={site.links.facebook} target="_blank" rel="noopener">Facebook</a>
+    </nav>
+
+    <div class="footer-contact">
+      <a class="footer-call" href={`tel:${site.phoneTel}`}>{site.phone}</a>
+      <a class="footer-email" href={`mailto:${site.email}`}>{site.email}</a>
+      <p class="footer-addr">{site.addressOneLine}</p>
+      <a href={site.directionsUrl} target="_blank" rel="noopener">Get directions</a>
+    </div>
+  </div>
+
+  <div class="wrap footer-fine">
+    <p>© {year} {site.longName}. All rights reserved.</p>
+    <p class="footer-demo">
+      Free estimates · Eco-friendly &amp; biodegradable products · Residential &amp; commercial.
+      The estimate form on this page opens your email app to send — for the fastest response, call or text {site.phone}.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-navy);
+    color: #cfe2f1;
+    padding-block: clamp(2.5rem, 5vw, 3.5rem) 6rem;
+  }
+  @media (min-width: 768px) { .footer { padding-bottom: 3rem; } }
+
+  .footer-grid {
+    display: grid;
+    gap: 1.75rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) { .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; } }
+
+  .footer-brand :global(img) {
+    height: 56px;
+    width: auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+  }
+  .footer-tag {
+    color: var(--color-sky);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 0.7rem;
+  }
+  .footer-loc { color: #9bbcd6; margin-top: 0.3rem; font-size: 0.9rem; }
+
+  .footer-nav { display: grid; gap: 0.5rem; align-content: start; }
+  .footer-nav a {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #cfe2f1;
+    text-decoration: none;
+  }
+  .footer-nav a:hover { color: #fff; }
+
+  .footer-contact { display: grid; gap: 0.4rem; align-content: start; }
+  .footer-call { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: #fff; text-decoration: none; }
+  .footer-call:hover { color: var(--color-sky); }
+  .footer-email { color: var(--color-sky); text-decoration: none; }
+  .footer-email:hover { text-decoration: underline; }
+  .footer-addr { color: #9bbcd6; font-size: 0.9rem; }
+  .footer-contact a { color: var(--color-sky); }
+
+  .footer-fine {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    gap: 0.5rem;
+  }
+  .footer-fine p { color: #9bbcd6; font-size: 0.82rem; }
+  .footer-demo { max-width: 90ch; }
+</style>

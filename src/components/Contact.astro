@@ -1,0 +1,242 @@
+---
+import * as site from '@data/site';
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-title">
+  <div class="wrap contact-grid">
+    <div class="contact-info">
+      <p class="eyebrow">Free estimates</p>
+      <h2 id="contact-title" class="section-title">Get your free estimate</h2>
+      <p class="section-intro">{site.contactIntro}</p>
+
+      <ul class="contact-list">
+        <li>
+          <span class="ci-label">Call or text</span>
+          <a class="ci-strong" href={`tel:${site.phoneTel}`}>{site.phone}</a>
+        </li>
+        <li>
+          <span class="ci-label">Email</span>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+        </li>
+        <li>
+          <span class="ci-label">Address</span>
+          <a href={site.mapsUrl} target="_blank" rel="noopener">{site.addressOneLine}</a>
+        </li>
+        <li>
+          <span class="ci-label">Follow</span>
+          <a href={site.links.facebook} target="_blank" rel="noopener">Facebook</a>
+        </li>
+      </ul>
+
+      <div class="contact-map">
+        <iframe
+          title={`Map showing the location of ${site.longName} at ${site.addressOneLine}`}
+          src={site.mapEmbedUrl}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+
+    <!-- TODO: This form has no backend. It currently composes a mailto: message
+         to info@piedmontpowerwashing.com on submit. Before launch, wire it to a
+         real handler (Formspree / Netlify Forms / a serverless POST endpoint)
+         and remove the mailto fallback. Fields mirror the original Wix form. -->
+    <form class="contact-form" data-contact-form novalidate aria-label="Free estimate request">
+      <div class="row">
+        <div class="field">
+          <label for="f-first">First name</label>
+          <input id="f-first" name="first" type="text" autocomplete="given-name" required />
+          <span class="err" data-err-for="f-first" hidden>Please enter your first name.</span>
+        </div>
+        <div class="field">
+          <label for="f-last">Last name</label>
+          <input id="f-last" name="last" type="text" autocomplete="family-name" required />
+          <span class="err" data-err-for="f-last" hidden>Please enter your last name.</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required />
+          <span class="err" data-err-for="f-email" hidden>Enter a valid email address.</span>
+        </div>
+        <div class="field">
+          <label for="f-phone">Phone</label>
+          <input id="f-phone" name="phone" type="tel" autocomplete="tel" required />
+          <span class="err" data-err-for="f-phone" hidden>Please enter a phone number.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-address">Address</label>
+        <input id="f-address" name="address" type="text" autocomplete="street-address" />
+      </div>
+      <div class="row row-2-1">
+        <div class="field">
+          <label for="f-city">City</label>
+          <input id="f-city" name="city" type="text" autocomplete="address-level2" />
+        </div>
+        <div class="field">
+          <label for="f-zip">Zip code</label>
+          <input id="f-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-message">How can we help?</label>
+        <textarea id="f-message" name="message" rows="4" placeholder="Tell us what you’d like cleaned — siding, driveway, deck, patio, fence…"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Send</button>
+      <p class="form-fine">
+        Prefer to talk it through? Call or text <a href={`tel:${site.phoneTel}`}>{site.phone}</a>.
+      </p>
+      <p class="form-success" data-success hidden role="status">
+        ✓ {site.contactConfirmation} <em>(Demo — opens your email app to send.)</em>
+      </p>
+    </form>
+  </div>
+</section>
+
+<script is:inline define:vars={{ toEmail: site.email }}>
+  const form = document.querySelector('[data-contact-form]');
+  if (form) {
+    const success = form.querySelector('[data-success]');
+    const showErr = (id, show) => {
+      const el = form.querySelector(`[data-err-for="${id}"]`);
+      if (el) el.hidden = !show;
+      const input = document.getElementById(id);
+      if (input) input.setAttribute('aria-invalid', show ? 'true' : 'false');
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = (id) => (document.getElementById(id)?.value || '').trim();
+
+      const firstOk = val('f-first').length > 0;
+      const lastOk = val('f-last').length > 0;
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('f-email'));
+      const phoneOk = val('f-phone').replace(/\D/g, '').length >= 7;
+
+      showErr('f-first', !firstOk);
+      showErr('f-last', !lastOk);
+      showErr('f-email', !emailOk);
+      showErr('f-phone', !phoneOk);
+
+      if (!firstOk) return document.getElementById('f-first')?.focus();
+      if (!lastOk) return document.getElementById('f-last')?.focus();
+      if (!emailOk) return document.getElementById('f-email')?.focus();
+      if (!phoneOk) return document.getElementById('f-phone')?.focus();
+
+      // No backend: compose a mailto so the request actually reaches the inbox.
+      const subject = `Free estimate request — ${val('f-first')} ${val('f-last')}`;
+      const body = [
+        `Name: ${val('f-first')} ${val('f-last')}`,
+        `Email: ${val('f-email')}`,
+        `Phone: ${val('f-phone')}`,
+        `Address: ${val('f-address')}`,
+        `City: ${val('f-city')}`,
+        `Zip: ${val('f-zip')}`,
+        '',
+        'Message:',
+        val('f-message'),
+      ].join('\n');
+
+      if (success) {
+        success.hidden = false;
+        success.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      window.location.href = `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+  }
+</script>
+
+<style>
+  .contact { background: var(--color-cloud); }
+  .contact-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 900px) { .contact-grid { grid-template-columns: 0.9fr 1.1fr; gap: 3rem; } }
+
+  .contact-list {
+    list-style: none;
+    margin: 0 0 1.75rem;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .contact-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+  .ci-label {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-slate-soft);
+  }
+  .contact-list a { color: var(--color-blue); text-decoration: none; font-weight: 500; }
+  .contact-list a:hover { text-decoration: underline; }
+  .ci-strong { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; color: var(--color-navy) !important; }
+
+  .contact-map {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    aspect-ratio: 4 / 3;
+    background: var(--color-cloud-2);
+  }
+  .contact-map iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+  .contact-form {
+    background: var(--color-white);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    display: grid;
+    gap: 1rem;
+    box-shadow: 0 18px 40px rgba(12, 44, 74, 0.08);
+  }
+  .row { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  @media (min-width: 520px) { .row { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 520px) { .row-2-1 { grid-template-columns: 2fr 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field label {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-slate);
+  }
+  .field input, .field textarea {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--color-line);
+    border-radius: 9px;
+    background: var(--color-cloud);
+    color: var(--color-ink);
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--color-slate-soft); }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(14, 95, 168, 0.18);
+  }
+  .field [aria-invalid='true'] { border-color: #d6453a; }
+  .err { color: #c0392b; font-size: 0.8rem; }
+  .form-fine { font-size: 0.9rem; color: var(--color-slate); margin: 0; }
+  .form-fine a { color: var(--color-blue); }
+  .form-success {
+    margin: 0;
+    color: #0d5a2b;
+    font-weight: 600;
+    background: #d8f0e0;
+    border: 1px solid #aedcbe;
+    border-radius: 9px;
+    padding: 0.7rem 0.9rem;
+  }
+  .form-success em { font-weight: 500; font-style: italic; color: #2f6b48; }
+</style>

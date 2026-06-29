@@ -1,0 +1,231 @@
+---
+import * as site from '@data/site';
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Resolve showcase photos from src/assets by basename.
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/*.{jpg,jpeg,png,webp}',
+  { eager: true },
+);
+const img = (name: string) => modules[`/src/assets/${name}.jpg`].default;
+
+// Branded before/after pairs (labels baked into the images) shown side by side.
+const pairs = await Promise.all(
+  site.showcasePairs.map(async (p) => {
+    const beforeImg = img(p.before);
+    const afterImg = img(p.after);
+    const [bFull, aFull] = await Promise.all([
+      getImage({ src: beforeImg, width: 1280, format: 'webp' }),
+      getImage({ src: afterImg, width: 1280, format: 'webp' }),
+    ]);
+    return { ...p, beforeImg, afterImg, beforeFull: bFull.src, afterFull: aFull.src };
+  }),
+);
+
+// Standalone shots (e.g. the half-cleaned walkway).
+const singles = await Promise.all(
+  site.showcaseSingles.map(async (s) => {
+    const image = img(s.src);
+    const full = await getImage({ src: image, width: 1280, format: 'webp' });
+    return { ...s, image, full: full.src };
+  }),
+);
+---
+
+<section id="work" class="work" aria-labelledby="work-title">
+  <div class="wrap">
+    <p class="eyebrow">Our work</p>
+    <h2 id="work-title" class="section-title">{site.galleryIntro}</h2>
+    <p class="section-intro">{site.galleryNote}</p>
+
+    <div class="work-list">
+      {pairs.map((p) => (
+        <figure class="work-pair">
+          <figcaption class="work-pair-label">{p.label}</figcaption>
+          <div class="work-pair-imgs">
+            <button class="work-tile" type="button" data-full={p.beforeFull} data-caption={`${p.label} — before`} aria-label={`View larger: ${p.beforeAlt}`}>
+              <Image src={p.beforeImg} alt={p.beforeAlt} widths={[360, 540, 720]} sizes="(min-width: 760px) 24vw, 46vw" loading="lazy" />
+            </button>
+            <button class="work-tile" type="button" data-full={p.afterFull} data-caption={`${p.label} — after`} aria-label={`View larger: ${p.afterAlt}`}>
+              <Image src={p.afterImg} alt={p.afterAlt} widths={[360, 540, 720]} sizes="(min-width: 760px) 24vw, 46vw" loading="lazy" />
+            </button>
+          </div>
+        </figure>
+      ))}
+
+      {singles.map((s) => (
+        <figure class="work-single">
+          <button class="work-tile" type="button" data-full={s.full} data-caption={s.caption} aria-label={`View larger: ${s.alt}`}>
+            <Image src={s.image} alt={s.alt} widths={[360, 540, 720]} sizes="(min-width: 760px) 24vw, 92vw" loading="lazy" />
+          </button>
+          <figcaption class="work-single-cap">{s.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+
+    <div class="work-cta">
+      <a class="btn btn-primary" href="#contact">Get a Free Estimate</a>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" data-lightbox-modal role="dialog" aria-modal="true" aria-labelledby="lightbox-cap" hidden>
+    <button class="lb-close" type="button" data-lb-close>
+      <span aria-hidden="true">✕</span><span class="sr-only">Close image viewer</span>
+    </button>
+    <button class="lb-nav lb-prev" type="button" data-lb-prev>
+      <span aria-hidden="true">‹</span><span class="sr-only">Previous image</span>
+    </button>
+    <figure class="lb-figure">
+      <div class="lb-stage" data-lb-stage></div>
+      <figcaption id="lightbox-cap" class="lb-caption" data-lb-caption></figcaption>
+    </figure>
+    <button class="lb-nav lb-next" type="button" data-lb-next>
+      <span aria-hidden="true">›</span><span class="sr-only">Next image</span>
+    </button>
+  </div>
+</section>
+
+<script>
+  const modal = document.querySelector('[data-lightbox-modal]');
+  const stage = document.querySelector('[data-lb-stage]');
+  const capEl = document.querySelector('[data-lb-caption]');
+  const closeBtn = document.querySelector('[data-lb-close]');
+  const prevBtn = document.querySelector('[data-lb-prev]');
+  const nextBtn = document.querySelector('[data-lb-next]');
+  const tiles = Array.from(document.querySelectorAll<HTMLElement>('.work-tile'));
+
+  const slides = tiles.map((t) => ({
+    full: t.getAttribute('data-full') || '',
+    caption: t.getAttribute('data-caption') || '',
+  }));
+  let current = 0;
+  let lastFocused: HTMLElement | null = null;
+
+  function render(i: number) {
+    if (!slides.length) return;
+    current = (i + slides.length) % slides.length;
+    const s = slides[current];
+    if (stage) stage.innerHTML = `<img src="${s.full}" alt="${s.caption}" style="width:100%;height:auto;border-radius:10px;display:block;" />`;
+    if (capEl) capEl.textContent = s.caption;
+  }
+  function open(i: number) {
+    if (!modal) return;
+    lastFocused = document.activeElement as HTMLElement;
+    render(i);
+    (modal as HTMLElement).hidden = false;
+    document.body.style.overflow = 'hidden';
+    (closeBtn as HTMLElement | null)?.focus();
+  }
+  function close() {
+    if (!modal) return;
+    (modal as HTMLElement).hidden = true;
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+  }
+
+  tiles.forEach((t, i) => t.addEventListener('click', () => open(i)));
+  closeBtn?.addEventListener('click', close);
+  prevBtn?.addEventListener('click', () => render(current - 1));
+  nextBtn?.addEventListener('click', () => render(current + 1));
+  modal?.addEventListener('click', (e) => { if (e.target === modal) close(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!modal || (modal as HTMLElement).hidden) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') render(current - 1);
+    else if (e.key === 'ArrowRight') render(current + 1);
+    else if (e.key === 'Tab') {
+      const f = Array.from(modal.querySelectorAll<HTMLElement>('button'));
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+</script>
+
+<style>
+  .work { background: var(--color-cloud); }
+
+  .work-list {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 760px) { .work-list { grid-template-columns: repeat(2, 1fr); } }
+
+  .work-pair, .work-single { margin: 0; }
+
+  .work-pair-label, .work-single-cap {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--color-navy);
+    margin-bottom: 0.5rem;
+  }
+  .work-single-cap { margin-top: 0.6rem; margin-bottom: 0; color: var(--color-slate); font-weight: 500; }
+
+  .work-pair-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+  .work-tile {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    background: var(--color-white);
+    overflow: hidden;
+    cursor: zoom-in;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.15s ease;
+  }
+  .work-tile:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-sky);
+    box-shadow: 0 12px 26px rgba(12, 44, 74, 0.12);
+  }
+  .work-tile :global(img) {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+  }
+  .work-single .work-tile :global(img) { aspect-ratio: 3 / 4; }
+
+  .work-cta { margin-top: 2.25rem; text-align: center; }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(8, 24, 40, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: clamp(1rem, 4vw, 3rem);
+  }
+  .lb-figure { margin: 0; max-width: 760px; width: 100%; }
+  .lb-stage { width: 100%; }
+  .lb-caption { color: #eaf3fb; text-align: center; margin-top: 0.9rem; font-size: 0.95rem; }
+  .lb-close, .lb-nav {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .lb-close:hover, .lb-nav:hover { background: rgba(255, 255, 255, 0.22); }
+  .lb-close { position: absolute; top: 1rem; right: 1rem; font-size: 1.2rem; }
+  @media (max-width: 560px) {
+    .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+    .lb-prev { left: 0.5rem; }
+    .lb-next { right: 0.5rem; }
+  }
+</style>
