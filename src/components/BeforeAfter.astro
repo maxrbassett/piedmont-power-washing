@@ -55,8 +55,43 @@ const widths = [480, 720, 1080];
   document.querySelectorAll<HTMLElement>('[data-ba]').forEach((ba) => {
     const range = ba.querySelector<HTMLInputElement>('.ba-range');
     if (!range) return;
-    const set = (v: number | string) => ba.style.setProperty('--pos', `${v}%`);
-    range.addEventListener('input', () => set(range.value));
+
+    const setPos = (v: number) => {
+      const clamped = Math.max(0, Math.min(100, v));
+      ba.style.setProperty('--pos', `${clamped}%`);
+      range.value = String(clamped);
+    };
+
+    // Keyboard + assistive tech drive the native range input.
+    range.addEventListener('input', () => setPos(Number(range.value)));
+
+    // Pointer Events unify touch, pen, and mouse so you can drag anywhere on
+    // the image — not just on the (invisible) range thumb. touch-action:pan-y
+    // on .ba lets vertical page scrolling pass through while horizontal drags
+    // move the slider.
+    const posFromX = (clientX: number) => {
+      const rect = ba.getBoundingClientRect();
+      return rect.width ? ((clientX - rect.left) / rect.width) * 100 : 50;
+    };
+
+    let dragging = false;
+    ba.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      ba.setPointerCapture(e.pointerId);
+      setPos(posFromX(e.clientX));
+    });
+    ba.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      e.preventDefault(); // stop text selection / scroll once a drag is underway
+      setPos(posFromX(e.clientX));
+    });
+    const end = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      try { ba.releasePointerCapture(e.pointerId); } catch {}
+    };
+    ba.addEventListener('pointerup', end);
+    ba.addEventListener('pointercancel', end);
   });
 </script>
 
@@ -70,6 +105,8 @@ const widths = [480, 720, 1080];
     background: var(--color-cloud-2);
     box-shadow: 0 22px 50px rgba(12, 44, 74, 0.22);
     user-select: none;
+    cursor: ew-resize;
+    /* Let vertical page scrolling pass through; horizontal drags move the slider. */
     touch-action: pan-y;
   }
   .ba-img {
@@ -145,7 +182,9 @@ const widths = [480, 720, 1080];
     margin: 0;
     padding: 0;
     opacity: 0;
-    cursor: ew-resize;
+    /* Pointer handling lives on .ba (drag anywhere). The range stays only for
+       keyboard/AT, so it must not swallow touch/mouse events. */
+    pointer-events: none;
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
